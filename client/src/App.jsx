@@ -2,6 +2,7 @@ import './App.css'
 import { useEffect, useState } from 'react';
 import axios from "axios";
 
+
 function App() {
  const [name, setName] = useState("");
  const [course, setCourse] = useState("");
@@ -10,7 +11,7 @@ function App() {
 const [id, setId] = useState("");
  useEffect(() => {
    axios
-     .get("http://localhost:5001/students")
+     .get("https://mauricio-mern-backend.vercel.app/students")
      .then((response) => {
        setStudents(response.data);
      });
@@ -18,14 +19,14 @@ const [id, setId] = useState("");
  const saveStudent = (event) => {
    event.preventDefault();
    axios
-     .post("http://localhost:5001/students", {
+     .post("https://mauricio-mern-backend.vercel.app/students", {
        name: name,
        course: course,
        age: age
      })
      .then(() => {
        axios
-         .get("http://localhost:5001/students")
+         .get("https://mauricio-mern-backend.vercel.app/students")
          .then((response) => {
            setStudents(response.data);
          });
@@ -38,9 +39,9 @@ const [id, setId] = useState("");
  };
  const deleteStudent = (id) => {
    axios
-     .delete(`http://localhost:5001/students/${id}`).then(() => {
+     .delete(`https://mauricio-mern-backend.vercel.app/students/${id}`).then(() => {
        axios
-         .get("http://localhost:5001/students")
+         .get("https://mauricio-mern-backend.vercel.app/students")
          .then((response) => {
            setStudents(response.data);
          });
@@ -50,14 +51,14 @@ const [id, setId] = useState("");
  const updateStudent = (event) => {
    event.preventDefault();
    axios
-     .put(`http://localhost:5001/students/${id}`, {
+     .put(`https://mauricio-mern-backend.vercel.app/students/${id}`, {
        name: name,
        course: course,
        age: age
      })
      .then(() => {
        axios
-         .get("http://localhost:5001/students")
+         .get("https://mauricio-mern-backend.vercel.app/students")
          .then((response) => {
            setStudents(response.data);
          });
