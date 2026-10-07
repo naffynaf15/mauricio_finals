@@ -2,22 +2,35 @@ const express = require('express');
 const cors = require('cors');
 const mongoose = require("mongoose");
 const Student = require("./models/Student");
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 
 const app = express();
 app.use(cors());
 app.use(express.json());
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => {
-    console.log("Connected to MongoDB");
-    app.listen(5001, () => {
-      console.log("Server is running on port 5001");
-    });
-  })
-  .catch((error) => {
-    console.log("MongoDB connection error:", error.message);
-  });
+let databaseConnection;
+const connectToDatabase = () => {
+  if (!databaseConnection) {
+    databaseConnection = mongoose.connect(process.env.MONGO_URI)
+      .then(() => console.log("Connected to MongoDB"))
+      .catch((error) => {
+        databaseConnection = null;
+        throw error;
+      });
+  }
+  return databaseConnection;
+};
+
+app.use(async (req, res, next) => {
+  try {
+    await connectToDatabase();
+    next();
+  } catch (error) {
+    console.error("MongoDB connection error:", error.message);
+    res.status(500).json({ error: "Could not connect to MongoDB." });
+  }
+});
 
 
 app.get('/', (req, res) => {
@@ -64,3 +77,17 @@ app.delete('/students/:id', async (req, res) => {
    await Student.findByIdAndDelete(req.params.id);
    res.json('Deleted!');
 });
+
+if (require.main === module) {
+  const port = process.env.PORT || 5001;
+  connectToDatabase()
+    .then(() => app.listen(port, () => {
+      console.log(`Server is running on port ${port}`);
+    }))
+    .catch((error) => {
+      console.error("Could not start server:", error.message);
+      process.exit(1);
+    });
+}
+
+module.exports = app;
