@@ -8,16 +8,16 @@ require('dotenv').config();
 const app = express();
 app.use(cors());
 app.use(express.json());
-mongoose
-
- .connect(process.env.MONGO_URI)
- .then(() => {
-   console.log("Connected to MongoDB");
- })
-
- .catch((error) => {
-   console.log("MongoDB connection error:", error);
- });
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => {
+    console.log("Connected to MongoDB");
+    app.listen(5001, () => {
+      console.log("Server is running on port 5001");
+    });
+  })
+  .catch((error) => {
+    console.log("MongoDB connection error:", error.message);
+  });
 
 
 app.get('/', (req, res) => {
@@ -30,15 +30,29 @@ app.get('/students', async (req, res) => {
 });
 
 app.post('/students', async (req, res) => {
- const { name, age, course } = req.body;
- const newStudent = new Student({
-   name: name,
-   age: age,
-   course: course
- });
+  try {
+    console.log("Received student:", req.body);
 
- await newStudent.save();
- res.json('Saved!');
+    const newStudent = new Student({
+      name: req.body.name,
+      age: req.body.age,
+      course: req.body.course
+    });
+
+    const savedStudent = await newStudent.save();
+
+    console.log("Student saved:", savedStudent);
+
+    res.status(201).json(savedStudent);
+
+  } catch (error) {
+    console.log("Error saving student:", error);
+
+    res.status(500).json({
+      message: "Error saving student",
+      error: error.message
+    });
+  }
 });
 
 app.put('/students/:id', async (req, res) => {
@@ -49,11 +63,4 @@ app.put('/students/:id', async (req, res) => {
 app.delete('/students/:id', async (req, res) => {
    await Student.findByIdAndDelete(req.params.id);
    res.json('Deleted!');
-});
-
-
-
-
-app.listen(5000, () => {
- console.log('Server is running on port 5000');
 });

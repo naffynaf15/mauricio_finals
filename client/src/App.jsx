@@ -7,10 +7,10 @@ function App() {
  const [course, setCourse] = useState("");
  const [age, setAge] = useState("");
  const [students, setStudents] = useState([]);
-const [id, setId] = useState([]);
+const [id, setId] = useState("");
  useEffect(() => {
    axios
-     .get("http://localhost:5000/students")
+     .get("http://localhost:5001/students")
      .then((response) => {
        setStudents(response.data);
      });
@@ -18,14 +18,14 @@ const [id, setId] = useState([]);
  const saveStudent = (event) => {
    event.preventDefault();
    axios
-     .post("http://localhost:5000/students", {
+     .post("http://localhost:5001/students", {
        name: name,
        course: course,
        age: age
      })
      .then(() => {
        axios
-         .get("http://localhost:5000/students")
+         .get("http://localhost:5001/students")
          .then((response) => {
            setStudents(response.data);
          });
@@ -33,13 +33,14 @@ const [id, setId] = useState([]);
        setName("");
        setCourse("");
        setAge("");
+       setId("");
      });
  };
  const deleteStudent = (id) => {
    axios
-     .delete(`http://localhost:5000/students/${id}`).then(() => { 
+     .delete(`http://localhost:5001/students/${id}`).then(() => {
        axios
-         .get("http://localhost:5000/students")
+         .get("http://localhost:5001/students")
          .then((response) => {
            setStudents(response.data);
          });
@@ -47,15 +48,16 @@ const [id, setId] = useState([]);
      });
  };
  const updateStudent = (event) => {
+   event.preventDefault();
    axios
-     .put(`http://localhost:5000/students/${id}`, {
+     .put(`http://localhost:5001/students/${id}`, {
        name: name,
        course: course,
        age: age
      })
      .then(() => {
        axios
-         .get("http://localhost:5000/students")
+         .get("http://localhost:5001/students")
          .then((response) => {
            setStudents(response.data);
          });
@@ -63,6 +65,7 @@ const [id, setId] = useState([]);
        setName("");
        setCourse("");
        setAge("");
+       setId("");
      })
  };
  
@@ -86,7 +89,7 @@ const [id, setId] = useState([]);
         </div>
             ))}
     <div>
-        <form onSubmit={saveStudent}>
+        <form onSubmit={id ? updateStudent : saveStudent}>
   <div>
     <input
       type="text"
@@ -109,7 +112,7 @@ const [id, setId] = useState([]);
         onChange={(event) => setAge(event.target.value)}/>
     </div>
   <div>
-      <button className="submit-btn"type="submit">save</button>
+      <button className="submit-btn" type="submit">{id ? "update" : "save"}</button>
       </div>
   </form>
   </div>
